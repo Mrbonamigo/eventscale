@@ -1,26 +1,33 @@
 @import "tailwindcss";
+@source "../components";
 
+/* We reset the colors to make sure nothing is forced to white */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #000000;
+}
+/* ... resto do arquivo igual ... */
+
+/* We reset the colors to make sure nothing is forced to white */
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* In Dark Mode, we use a very dark color */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #020617;
+    --foreground: #ffffff;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Base styles to allow transparency */
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    margin: 0;
+    padding: 0;
+  }
 }
