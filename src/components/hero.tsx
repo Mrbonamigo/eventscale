@@ -1,16 +1,30 @@
+"use client";
+
 import Link from "next/link";
+import { FeaturedCard } from "./FeaturedCard";
 
-export function Hero() {
+// Define the shape of our Event for TypeScript 🛡️
+interface Event {
+    title: string;
+    date: string;
+    location: string;
+    imageUrl: string;
+}
+
+interface HeroProps {
+    featuredEvent?: Event;
+}
+
+export function Hero({ featuredEvent }: HeroProps) {
     return (
-        /* Trocamos 'container' por 'w-full' e garantimos o alinhamento central */
-        <section className="w-full flex flex-col items-center justify-center text-center gap-8 pb-8 pt-6 md:py-20 px-4">
+        <section className="w-full flex flex-col items-center justify-center text-center gap-12 pb-16 pt-6 md:pt-20 px-4">
+            {/* Text Content 📝 */}
             <div className="flex max-w-[980px] flex-col items-center gap-4">
-
                 <h1 className="text-4xl font-extrabold leading-tight tracking-tighter md:text-6xl text-white">
                     The Future of <span className="text-purple-400">Live Events</span> <br />
-                    is <span className="bg-linear-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                        Secure and Scalable.
-                    </span>
+                    is <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+            Secure and Scalable.
+          </span>
                 </h1>
 
                 <p className="max-w-[700px] text-lg text-slate-400 md:text-xl">
@@ -19,7 +33,7 @@ export function Hero() {
                 </p>
             </div>
 
-            {/* Div de botões centralizada pelo flex do pai */}
+            {/* Action Buttons 🖱️ */}
             <div className="flex flex-wrap justify-center gap-4">
                 <Link
                     href="/events"
@@ -35,6 +49,18 @@ export function Hero() {
                     Learn More
                 </Link>
             </div>
+
+            {/* Featured Card Section 🌟 */}
+            {featuredEvent && (
+                <div className="w-full max-w-[1100px] mt-8">
+                    <FeaturedCard
+                        title={featuredEvent.title}
+                        date={featuredEvent.date}
+                        location={featuredEvent.location}
+                        imageUrl={featuredEvent.imageUrl}
+                    />
+                </div>
+            )}
         </section>
     );
 }

@@ -1,0 +1,25 @@
+
+
+services:
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: eventscale-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres # Senha simples para dev
+      POSTGRES_DB: eventscale
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Serviço de Cache (Redis) ⚡
+  redis:
+    image: redis:alpine
+    container_name: eventscale-redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
