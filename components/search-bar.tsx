@@ -8,30 +8,30 @@ export function SearchBar() {
     const pathname = usePathname();
     const { replace } = useRouter();
 
-    // Esta é a função que "espera" 300ms antes de agir
     const handleSearch = useDebouncedCallback((term: string) => {
         const params = new URLSearchParams(searchParams);
-
         if (term) {
-            params.set('query', term); // Coloca ?query=termo na URL
+            params.set('query', term);
         } else {
-            params.delete('query'); // Remove se estiver vazio
+            params.delete('query');
         }
-
-        // Atualiza a URL sem dar refresh na página
         replace(`${pathname}?${params.toString()}`);
     }, 300);
 
     return (
-        <div className="w-full max-w-md mx-auto mb-12 relative">
+        <div className="relative w-full">
             <input
                 type="text"
                 placeholder="Search events..."
-                className="w-full rounded-full border border-white/10 bg-white/5 px-6 py-4 text-white outline-none focus:border-purple-500 transition-all"
-                onChange={(e) => handleSearch(e.target.value)}
                 defaultValue={searchParams.get('query')?.toString()}
-            />
-            <span className="absolute right-6 top-4 text-xl">🔍</span>
+                onChange={(e) => handleSearch(e.target.value)}
+                className="w-full py-3 px-6 pr-12 border border-white/10 bg-white/5 text-base outline-none shadow-[0_4px_15px_rgba(0,0,0,0.3)] transition-all duration-300 ease-in-out rounded-full"
+                />
+            <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[18px] pointer-events-none">
+  🔍
+</span>
+
         </div>
+
     );
 }

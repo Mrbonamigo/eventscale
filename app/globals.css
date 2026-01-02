@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@source "../components";
+@source "../components/**/*.{ts,tsx}";
 
 /* We reset the colors to make sure nothing is forced to white */
 :root {
@@ -17,8 +17,9 @@
 /* In Dark Mode, we use a very dark color */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #020617;
+    --background: #020617; /* Slate 950 - Fundo Gamer */
     --foreground: #ffffff;
+
   }
 }
 
