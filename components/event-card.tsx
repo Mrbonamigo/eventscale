@@ -1,8 +1,9 @@
 import Image from "next/image";
-import Link from "next/link";
+import Link from "next/link"; // STEP 1: Import the "Magic Portal" tool
 
 // 1. THE CONTRACT (Interface)
 interface EventCardProps {
+    id: string;      // STEP 2: Add the "Address" (ID). The card needs to know where to go!
     title: string;
     date: string;
     location: string;
@@ -11,17 +12,15 @@ interface EventCardProps {
 }
 
 // 2. THE COMPONENT
-export function EventCard({ title, date, location, price, imageUrl }: EventCardProps) {
+// Don't forget to add 'id' here to the list of props the component receives
+export function EventCard({ id, title, date, location, price, imageUrl }: EventCardProps) {
     return (
-        // Added 'max-w-sm' to limit card width and 'mx-auto' to center it.
-        // This prevents the card (and image) from stretching too much.
-        <div className="group relative overflow-hidden rounded-xl border border-white/10 bg-slate-900/40 backdrop-blur-sm transition-all hover:border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] max-w-sm mx-auto w-full">
+        // STEP 3: Create the Portal!
+        // We wrap everything with Link.
+        // href={`/events/${id}`} means: "Take me to house number [id]"
+        <Link href={`/events/${id}`} className="block group relative overflow-hidden rounded-xl border border-white/10 bg-slate-900/40 backdrop-blur-sm transition-all hover:border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] max-w-sm mx-auto w-full">
 
             {/* Part 1: The Image */}
-            {/* - aspect-square: Forces a perfect square shape (1:1 ratio).
-                - w-full: Fills the width of the card (which is now limited).
-                - object-cover: Ensures the image covers the square without distortion.
-            */}
             <div className="relative aspect-square w-full overflow-hidden">
                 <img
                     src={imageUrl}
@@ -30,7 +29,7 @@ export function EventCard({ title, date, location, price, imageUrl }: EventCardP
                 />
             </div>
 
-            {/* Part 2: The Information */}
+            {/* Part 2: The Info */}
             <div className="p-4">
                 <h3 className="text-lg font-bold text-white group-hover:text-purple-400 transition-colors">
                     {title}
@@ -45,6 +44,6 @@ export function EventCard({ title, date, location, price, imageUrl }: EventCardP
                 </div>
             </div>
 
-        </div>
+        </Link>
     );
 }

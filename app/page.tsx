@@ -1,20 +1,19 @@
-import { Hero } from "../components/hero";
-import { EventGrid } from "../components/event-grid";
-import { EventFooter } from "../components/event-footer";
+import { Hero } from "@/components/hero";
+import { EventSection } from "@/components/event-section";
+import { EventFooter } from "@/components/event-footer"; // Ou EventFooter, conforme o seu nome
+import { getAllEvents } from "@/lib/data";
 
-export default function Home() {
+export default async function Home() {
+    const allEvents = await getAllEvents();
+
     return (
-        <main className="relative flex min-h-screen flex-col items-center bg-slate-950">
-
-            {/* Top Section (Showcase) */}
+        <main className="min-h-screen bg-black">
             <Hero />
 
-            {/* Event Listing (The Grid) */}
-            <EventGrid />
+            {/* O EventSection agora agrupa a SearchBar e o EventGrid */}
+            <EventSection initialEvents={allEvents} />
 
-            {/* Footer Section (New) */}
             <EventFooter />
-
         </main>
     );
 }
