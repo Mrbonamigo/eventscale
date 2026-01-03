@@ -3,6 +3,7 @@
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { useDebouncedCallback } from 'use-debounce';
 
+
 export function SearchBar() {
     const searchParams = useSearchParams();
     const pathname = usePathname();
@@ -15,7 +16,10 @@ export function SearchBar() {
         } else {
             params.delete('query');
         }
-        replace(`${pathname}?${params.toString()}`);
+
+        // Usamos a função 'replace' que extraímos do useRouter()
+        // O segundo argumento { scroll: false } impede o pulo para o topo
+        replace(`${pathname}?${params.toString()}`, { scroll: false });
     }, 300);
 
     return (

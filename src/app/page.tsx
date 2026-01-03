@@ -4,31 +4,31 @@ import { EventFooter } from "@/components/event-footer";
 import { getAllEvents } from "@/lib/data";
 
 interface HomeProps {
-    // No Next.js 15+, searchParams é uma Promise
-    searchParams: Promise<{ category?: string }>;
+    // In Next.js 15+, searchParams is a Promise
+    searchParams: Promise<{
+        category?: string;
+        query?: string; // Added query parameter
+    }>;
 }
 
 export default async function Home({ searchParams }: HomeProps) {
-    // 1. Aguardamos os parâmetros da URL
-    const { category } = await searchParams;
+    // 1. Await the search parameters from the URL
+    const { category, query } = await searchParams;
 
-    // 2. Procuramos todos os eventos no banco
-    const allEvents = await getAllEvents();
+    // 2. Fetch events directly from the database with active filters
+    // This replaces the manual .filter() we had before
+    const filteredEvents = await getAllEvents(category, query);
 
-    // 3. Aplicamos a lógica de filtro
-    // Se a categoria for "All" ou estiver vazia, mostramos tudo.
-    // Caso contrário, filtramos pela categoria exata.
-    const filteredEvents = !category || category === "All"
-        ? allEvents
-        : allEvents.filter(event => event.category === category);
-
-    const featuredEvent = allEvents[0];
+    // 3. Define the featured event (usually the first one found)
+    // If no events match the search, we can fall back to the first general event
+    const featuredEvent = filteredEvents[0] || (await getAllEvents())[0];
 
     return (
         <main className="min-h-screen bg-black">
+            {/* Display the main banner with a highlight event */}
             <Hero featuredEvent={featuredEvent} />
 
-            {/* 4. Passamos os eventos já filtrados para a seção */}
+            {/* Pass the server-filtered events to the grid section */}
             <EventSection initialEvents={filteredEvents} />
 
             <EventFooter />

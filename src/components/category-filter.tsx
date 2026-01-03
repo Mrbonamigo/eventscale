@@ -3,7 +3,18 @@
 import { Button } from "@/components/ui/button";
 import { useSearchParams, useRouter } from "next/navigation";
 
-const categories = ["All", "Shows", "Parties", "Theater", "Sports"];
+// 📝 Atualizamos a lista para bater com o banco de dados
+const categories = [
+    "All",
+    "Tech & Innovation",
+    "Music & Nightlife",
+    "Gastronomy",
+    "Art & Culture",
+    "Marketing & Business",
+    "Gaming & E-sports",
+    "Wellness",
+    "Sustainability"
+];
 
 export function CategoryFilter() {
     const searchParams = useSearchParams();
@@ -17,7 +28,6 @@ export function CategoryFilter() {
         router.push(`?${params.toString()}`, { scroll: false });
     };
 
-    // Faltava o comando return e a estrutura de contêiner abaixo:
     return (
         <div className="w-full overflow-hidden py-4">
             <div className="flex flex-nowrap gap-4 overflow-x-auto pb-6 px-4 no-scrollbar snap-x scroll-smooth">

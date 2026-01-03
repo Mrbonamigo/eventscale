@@ -1,8 +1,10 @@
 import { db } from "@/db";
-import { events } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { events, seats } from "@/db/schema";
+import { eq, ilike, or, and, SQL } from "drizzle-orm";
 
-// 1. Data structure interface
+/**
+ * Interface representing the event structure used across the application.
+ */
 export interface Event {
     id: string;
     title: string;
@@ -14,31 +16,56 @@ export interface Event {
     category: string;
 }
 
-// Helper function to map Database rows to our App Interface
+/**
+ * Maps raw database rows to our standardized Event interface.
+ * Handles date formatting and default values for missing data.
+ */
 function mapDatabaseEventToAppEvent(dbEvent: typeof events.$inferSelect): Event {
     return {
         id: String(dbEvent.id),
         title: dbEvent.title,
         description: dbEvent.description || "Join us for this amazing event! More details coming soon.",
-        // Formatting date to English standard
         date: new Date(dbEvent.date).toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',
             year: 'numeric'
         }),
         location: dbEvent.location,
-        price: "$100.00", // ⚠️ Temporary fixed price
+        price: "$100.00", // ⚠️ Placeholder: Update once price logic is implemented in DB
         imageUrl: dbEvent.imageUrl || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30",
-        // 🔍 IMPORTANT: Ensure your DB schema has a 'category' field.
-        // If it doesn't, the filter will only work with "All".
-        category: (dbEvent as any).category || "All"
+        category: dbEvent.category || "All"
     };
 }
 
-// Fetch ALL events (Home Page)
-export async function getAllEvents(): Promise<Event[]> {
+/**
+ * Fetches all events from the database with optional filtering by category and search term.
+ * Performs filtering at the database level for better performance.
+ */
+export async function getAllEvents(category?: string, query?: string): Promise<Event[]> {
     try {
-        const dbResults = await db.select().from(events);
+        const filters: SQL[] = [];
+
+        // Apply category filter if it's not "All"
+        if (category && category !== "All") {
+            filters.push(eq(events.category, category));
+        }
+
+        // Apply search query filter (Case-insensitive search in title or description)
+        if (query) {
+            const searchTerm = `%${query}%`;
+            filters.push(
+                or(
+                    ilike(events.title, searchTerm),
+                    ilike(events.description, searchTerm)
+                ) as SQL
+            );
+        }
+
+        const dbResults = await db
+            .select()
+            .from(events)
+            .where(filters.length > 0 ? and(...filters) : undefined);
+
         return dbResults.map(mapDatabaseEventToAppEvent);
     } catch (error) {
         console.error("Error fetching events:", error);
@@ -46,11 +73,12 @@ export async function getAllEvents(): Promise<Event[]> {
     }
 }
 
-// Fetch SINGLE event by ID (Details Page)
+/**
+ * Fetches a single event by its unique numeric ID.
+ */
 export async function getEventById(id: string): Promise<Event | undefined> {
     try {
         const eventId = Number(id);
-
         if (isNaN(eventId)) return undefined;
 
         const result = await db
@@ -64,5 +92,30 @@ export async function getEventById(id: string): Promise<Event | undefined> {
     } catch (error) {
         console.error("Error fetching event by ID:", error);
         return undefined;
+    }
+}
+
+/**
+ * Fetches all seats associated with a specific event ID.
+ * Returns information about availability and seat numbering.
+ */
+export async function getSeatsByEventId(eventId: string) {
+    try {
+        const id = Number(eventId);
+        if (isNaN(id)) {
+            console.error("Invalid event ID provided to getSeatsByEventId");
+            return [];
+        }
+
+        // Fetching seats belonging to the specific event
+        const eventSeats = await db
+            .select()
+            .from(seats)
+            .where(eq(seats.eventId, id));
+
+        return eventSeats;
+    } catch (error) {
+        console.error("Error fetching seats:", error);
+        return [];
     }
 }

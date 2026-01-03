@@ -6,16 +6,16 @@ async function seed() {
     console.log("🌱 Starting database seed...");
 
     try {
-        // 1. Clean existing data to avoid duplicates and errors
+        // 1. Clean existing data to avoid duplicates
         console.log("🧹 Clearing existing data...");
         await db.delete(seats);
         await db.delete(events);
 
-        // 2. Array with 10 Global Events including categories for the filter
+        // 2. Array with 10 Global Events with specific categories
         const eventsToSeed = [
             {
                 title: "Global Tech Summit 2026",
-                category: "Shows",
+                category: "Tech & Innovation",
                 description: "The leading tech conference in Silicon Valley, focusing on AI and Quantum Computing.",
                 location: "San Francisco, USA",
                 date: new Date("2026-05-15T09:00:00"),
@@ -23,7 +23,7 @@ async function seed() {
             },
             {
                 title: "London Summer Rock Fest",
-                category: "Shows",
+                category: "Music & Nightlife",
                 description: "Three days of legendary rock performances at Wembley.",
                 location: "London, UK",
                 date: new Date("2026-07-10T18:00:00"),
@@ -31,7 +31,7 @@ async function seed() {
             },
             {
                 title: "Authentic Italian Cooking Class",
-                category: "Parties",
+                category: "Gastronomy",
                 description: "Master the art of pasta making with local chefs in the heart of Rome.",
                 location: "Rome, Italy",
                 date: new Date("2026-04-20T14:00:00"),
@@ -39,7 +39,7 @@ async function seed() {
             },
             {
                 title: "Berlin Startup Marathon",
-                category: "Sports",
+                category: "Tech & Innovation",
                 description: "48 hours to build, pitch, and launch your next big idea.",
                 location: "Berlin, Germany",
                 date: new Date("2026-08-05T08:00:00"),
@@ -47,7 +47,7 @@ async function seed() {
             },
             {
                 title: "Louvre Modern Art Night",
-                category: "Theater",
+                category: "Art & Culture",
                 description: "An exclusive night tour exploring the contrast between classic and digital art.",
                 location: "Paris, France",
                 date: new Date("2026-03-12T20:00:00"),
@@ -55,7 +55,7 @@ async function seed() {
             },
             {
                 title: "NYC Digital Marketing Week",
-                category: "Shows",
+                category: "Marketing & Business",
                 description: "Top strategies for brand growth in the competitive US market.",
                 location: "New York City, USA",
                 date: new Date("2026-06-01T09:00:00"),
@@ -63,7 +63,7 @@ async function seed() {
             },
             {
                 title: "Seoul E-Sports Championship",
-                category: "Sports",
+                category: "Gaming & E-sports",
                 description: "Watch the world's best teams compete in the League of Legends finals.",
                 location: "Seoul, South Korea",
                 date: new Date("2026-09-15T12:00:00"),
@@ -71,7 +71,7 @@ async function seed() {
             },
             {
                 title: "Tokyo Literature & Manga Fair",
-                category: "Theater",
+                category: "Art & Culture",
                 description: "A celebration of Japanese storytelling from traditional novels to modern manga.",
                 location: "Tokyo, Japan",
                 date: new Date("2026-10-28T10:00:00"),
@@ -79,7 +79,7 @@ async function seed() {
             },
             {
                 title: "Bali Yoga & Wellness Retreat",
-                category: "Parties",
+                category: "Wellness",
                 description: "Reconnect with nature and yourself in the spiritual center of Ubud.",
                 location: "Bali, Indonesia",
                 date: new Date("2026-11-02T07:00:00"),
@@ -87,7 +87,7 @@ async function seed() {
             },
             {
                 title: "Sydney Green Energy Con",
-                category: "Shows",
+                category: "Sustainability",
                 description: "Innovations in renewable energy and ocean sustainability.",
                 location: "Sydney, Australia",
                 date: new Date("2026-05-22T09:00:00"),
