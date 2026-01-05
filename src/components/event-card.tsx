@@ -5,27 +5,28 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 
-// 1. Define props separately to match the spread operator usage {...event} in the parent
+// 1. Interface matching the spread props passed from the parent component
 interface EventCardProps {
-    id: number;
+    id: number;          // DB returns a number
     title: string;
-    date: string | Date;
+    date: string | Date; // Handles both ISO strings and Date objects
     location: string;
     imageUrl: string;
-    category: string; // Replaced 'price' with 'category' to match DB schema
+    category: string;
 }
 
-// 2. Destructure props directly here to avoid the "reading 'date' of undefined" error
 export function EventCard({ id, title, date, location, imageUrl, category }: EventCardProps) {
     const cardRef = useRef<HTMLDivElement>(null);
 
-    // --- 3D Tilt Logic ---
+    // --- 3D Tilt Logic (Framer Motion) ---
     const x = useMotionValue(0);
     const y = useMotionValue(0);
 
+    // Spring physics for smooth animation
     const mouseXSpring = useSpring(x);
     const mouseYSpring = useSpring(y);
 
+    // Map mouse position to rotation degrees
     const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["10deg", "-10deg"]);
     const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-10deg", "10deg"]);
 
@@ -42,19 +43,23 @@ export function EventCard({ id, title, date, location, imageUrl, category }: Eve
     };
 
     const handleMouseLeave = () => {
+        // Reset position on leave
         x.set(0);
         y.set(0);
     };
 
-    // --- Safe Date Formatting ---
-    // Handle both string (ISO) and Date objects
+    // --- Safe Date Formatting Logic ---
+    // 1. Parse the date string coming from the DB/API
     const dateObj = new Date(date);
+
+    // 2. Extract Day
     const day = dateObj.getDate();
 
-    // Check if date is valid before formatting
+    // 3. Validate Date (prevents NaN/undefined errors if date is missing)
     const isDateValid = !isNaN(day);
+
+    // 4. Format for display (e.g., "15" and "OCT")
     const displayDay = isDateValid ? day : "--";
-    // Using 'en-US' since you requested English, but you can change to 'pt-BR'
     const displayMonth = isDateValid
         ? dateObj.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
         : "";
@@ -73,7 +78,7 @@ export function EventCard({ id, title, date, location, imageUrl, category }: Eve
                 whileHover={{ scale: 1.02 }}
                 className="group relative w-full h-[400px] rounded-3xl border border-white/10 bg-slate-950/40 backdrop-blur-xl overflow-hidden cursor-pointer isolate"
             >
-                {/* Background Image (Optimized) */}
+                {/* Background Image - Optimized with Next/Image */}
                 <div className="absolute inset-0 -z-10 h-full w-full">
                     <Image
                         src={imageUrl}

@@ -1,15 +1,16 @@
 import { db } from "@/db";
 import { events, seats } from "@/db/schema";
-import { eq, ilike, or, and, asc, SQL } from "drizzle-orm"; // Added 'asc' for sorting
+import { eq, ilike, or, and, asc, SQL } from "drizzle-orm";
 
 /**
  * Interface representing the event structure used across the application.
+ * Matches the props expected by the EventCard component.
  */
 export interface Event {
-    id: string;
+    id: number; // Changed to number to match DB and EventCard props
     title: string;
     description: string;
-    date: string;
+    date: string; // ISO String is safer for hydration than formatted string
     location: string;
     price: string;
     imageUrl: string;
@@ -18,45 +19,45 @@ export interface Event {
 
 /**
  * Maps raw database rows to our standardized Event interface.
- * Handles date formatting and default values for missing data.
  */
 function mapDatabaseEventToAppEvent(dbEvent: typeof events.$inferSelect): Event {
     return {
-        id: String(dbEvent.id),
+        id: dbEvent.id, // Keep as number
         title: dbEvent.title,
         description: dbEvent.description || "Join us for this amazing event! More details coming soon.",
-        date: new Date(dbEvent.date).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-        }),
+
+        // CRITICAL FIX:
+        // We use .toISOString() to ensure the date is passed in a standard format (YYYY-MM-DD...)
+        // This prevents "Invalid Date" errors on the client side.
+        date: new Date(dbEvent.date).toISOString(),
+
         location: dbEvent.location,
-        price: "$100.00", // ⚠️ Placeholder: Update once price logic is implemented in DB
+        price: "$100.00", // Placeholder until DB schema update
         imageUrl: dbEvent.imageUrl || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30",
         category: dbEvent.category || "All"
     };
 }
 
 /**
- * Fetches all events from the database with optional filtering by category and search term.
- * Performs filtering at the database level for better performance.
+ * Fetches all events from the database with optional filtering.
  */
 export async function getAllEvents(category?: string, query?: string): Promise<Event[]> {
     try {
         const filters: SQL[] = [];
 
-        // Apply category filter if it's not "All"
+        // 1. Apply category filter
         if (category && category !== "All") {
             filters.push(eq(events.category, category));
         }
 
-        // Apply search query filter (Case-insensitive search in title or description)
+        // 2. Apply search query filter
         if (query) {
             const searchTerm = `%${query}%`;
             filters.push(
                 or(
                     ilike(events.title, searchTerm),
-                    ilike(events.description, searchTerm)
+                    ilike(events.description, searchTerm),
+                    ilike(events.location, searchTerm) // Added location search
                 ) as SQL
             );
         }
@@ -64,7 +65,8 @@ export async function getAllEvents(category?: string, query?: string): Promise<E
         const dbResults = await db
             .select()
             .from(events)
-            .where(filters.length > 0 ? and(...filters) : undefined);
+            .where(filters.length > 0 ? and(...filters) : undefined)
+            .orderBy(asc(events.date)); // <--- CRITICAL: Sort by nearest date
 
         return dbResults.map(mapDatabaseEventToAppEvent);
     } catch (error) {
@@ -76,7 +78,7 @@ export async function getAllEvents(category?: string, query?: string): Promise<E
 /**
  * Fetches a single event by its unique numeric ID.
  */
-export async function getEventById(id: string): Promise<Event | undefined> {
+export async function getEventById(id: string | number): Promise<Event | undefined> {
     try {
         const eventId = Number(id);
         if (isNaN(eventId)) return undefined;
@@ -84,7 +86,8 @@ export async function getEventById(id: string): Promise<Event | undefined> {
         const result = await db
             .select()
             .from(events)
-            .where(eq(events.id, eventId));
+            .where(eq(events.id, eventId))
+            .limit(1); // Good practice to limit to 1
 
         if (result.length === 0) return undefined;
 
@@ -97,7 +100,6 @@ export async function getEventById(id: string): Promise<Event | undefined> {
 
 /**
  * Fetches all seats associated with a specific event ID.
- * Returns information about availability and seat numbering.
  */
 export async function getSeatsByEventId(eventId: string) {
     try {
@@ -107,13 +109,11 @@ export async function getSeatsByEventId(eventId: string) {
             return [];
         }
 
-        // Fetching seats belonging to the specific event
-        // We order by ID to ensure the grid layout remains stable after updates
         const eventSeats = await db
             .select()
             .from(seats)
             .where(eq(seats.eventId, id))
-            .orderBy(asc(seats.id)); // <--- FIXED: Added sorting here
+            .orderBy(asc(seats.id));
 
         return eventSeats;
     } catch (error) {
