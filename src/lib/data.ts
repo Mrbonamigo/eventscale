@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { events, seats } from "@/db/schema";
-import { eq, ilike, or, and, SQL } from "drizzle-orm";
+import { eq, ilike, or, and, asc, SQL } from "drizzle-orm"; // Added 'asc' for sorting
 
 /**
  * Interface representing the event structure used across the application.
@@ -108,10 +108,12 @@ export async function getSeatsByEventId(eventId: string) {
         }
 
         // Fetching seats belonging to the specific event
+        // We order by ID to ensure the grid layout remains stable after updates
         const eventSeats = await db
             .select()
             .from(seats)
-            .where(eq(seats.eventId, id));
+            .where(eq(seats.eventId, id))
+            .orderBy(asc(seats.id)); // <--- FIXED: Added sorting here
 
         return eventSeats;
     } catch (error) {

@@ -10,6 +10,7 @@ import { revalidatePath } from "next/cache";
  * @param seatId - The unique ID of the seat to be reserved.
  */
 export async function reserveSeat(seatId: number) {
+    console.log("🖱️ Tentando reservar assento ID:", seatId);
     try {
         // 1. We should update the seat only if it's currently 'available'
         // This prevents double-booking if two people click at the same time.
