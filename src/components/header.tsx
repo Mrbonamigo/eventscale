@@ -1,45 +1,75 @@
+"use client";
+
 import Link from "next/link";
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { Ticket } from "lucide-react";
 
 export function Header() {
     return (
-        // The main container for our header
-        // It has a border at the bottom and a blurred background effect
-        <header
-            style={{
-                position: 'sticky',
-                top: 0,
-                zIndex: 50,
-                width: '100%',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                backgroundColor: 'rgba(2, 6, 23, 0.5)', // Transparent dark color
-                backdropFilter: 'blur(12px)',           // The "glass" effect
-                WebkitBackdropFilter: 'blur(12px)',     // For Safari browser
-            }}
-        >
+        // Container Principal: Fixo no topo, fundo escuro com desfoque (Glassmorphism)
+        <header className="fixed top-0 w-full z-50 border-b border-white/10 bg-slate-950/80 backdrop-blur-md">
+            <div className="container mx-auto px-4 h-16 flex items-center justify-between">
 
-            {/* This div centers the content and adds spacing */}
-            <div className="container flex h-14 max-w-screen-2xl items-center justify-between px-4">
+                {/* --- LADO ESQUERDO: LOGO --- */}
+                <Link
+                    href="/"
+                    className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                >
+                    <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-purple-900/50">
+                        <Ticket className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-lg font-bold text-white tracking-tight">
+                        EventScale
+                    </span>
+                </Link>
 
-                {/* LEFT SIDE: The Logo */}
-                <div className="mr-4 flex">
-                    <Link href="/" className="mr-6 flex items-center space-x-2">
-                        <span className="font-bold text-lg">EventScale</span>
-                    </Link>
+                {/* --- LADO DIREITO: LOGIN / MENU --- */}
+                <div className="flex items-center gap-4">
+
+                    {/* Se o usuário estiver LOGADO: */}
+                    <SignedIn>
+                        {/* Links de navegação (visíveis apenas em desktop) */}
+                        <nav className="hidden md:flex items-center gap-6 mr-6 text-sm font-medium text-slate-300">
+                            <Link href="/tickets" className="hover:text-white transition-colors">
+                                Meus Ingressos
+                            </Link>
+                            {/* Opcional: Link para Admin */}
+                            {/* <Link href="/admin" className="hover:text-white">Admin</Link> */}
+                        </nav>
+
+                        {/* Botão de Perfil do Clerk */}
+                        <div className="flex items-center gap-2 pl-4 border-l border-white/10">
+                            <UserButton
+                                afterSignOutUrl="/"
+                                appearance={{
+                                    elements: {
+                                        avatarBox: "w-8 h-8 ring-2 ring-purple-500/20"
+                                    }
+                                }}
+                            />
+                        </div>
+                    </SignedIn>
+
+                    {/* Se o usuário for VISITANTE (Não logado): */}
+                    <SignedOut>
+                        <div className="flex items-center gap-3">
+                            {/* Botão de Entrar (Texto simples) */}
+                            <SignInButton mode="modal">
+                                <button className="text-sm font-medium text-slate-300 hover:text-white transition-colors px-3 py-2">
+                                    Entrar
+                                </button>
+                            </SignInButton>
+
+                            {/* Botão de Cadastro (Destaque Roxo) */}
+                            <SignInButton mode="modal">
+                                <button className="text-sm font-bold bg-white text-slate-950 px-4 py-2 rounded-full hover:bg-purple-50 transition-all shadow-md">
+                                    Cadastrar
+                                </button>
+                            </SignInButton>
+                        </div>
+                    </SignedOut>
+
                 </div>
-
-                {/* RIGHT SIDE: The Buttons */}
-                <div className="flex items-center gap-2">
-                    {/* Login Button */}
-                    <Link href="/login" className="text-sm font-medium transition-colors hover:text-primary">
-                        Login
-                    </Link>
-
-                    {/* Sign Up Button (styled like a pill) */}
-                    <button className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">
-                        Sign Up
-                    </button>
-                </div>
-
             </div>
         </header>
     );

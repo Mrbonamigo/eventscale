@@ -1,22 +1,33 @@
-'use server';
+"use server";
 
 import { db } from "@/db";
 import { seats } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { auth } from "@clerk/nextjs/server";
 
-/**
- * Reservates a specific seat for an event.
- * @param seatId - The unique ID of the seat to be reserved.
- */
 export async function reserveSeat(seatId: number) {
-    console.log("🖱️ Tentando reservar assento ID:", seatId);
+    console.log("🖱️ Attempting to reserve seat ID:", seatId);
+
     try {
-        // 1. We should update the seat only if it's currently 'available'
-        // This prevents double-booking if two people click at the same time.
+        // 1. Get the current user session
+        const session = await auth();
+        const userId = session.userId;
+
+        // 2. Security Check: If no user is logged in, block the request
+        if (!userId) {
+            return { success: false, message: "You must be logged in to reserve a seat." };
+        }
+
+        // 3. Database Update (Optimistic Concurrency Control)
+        // We only update if the seat status is currently 'available'.
         const result = await db
             .update(seats)
-            .set({ status: 'reserved' })
+            .set({
+                status: 'reserved',
+                // Optional: Save userId here if your schema supports it
+                // userId: userId
+            })
             .where(
                 and(
                     eq(seats.id, seatId),
@@ -24,17 +35,17 @@ export async function reserveSeat(seatId: number) {
                 )
             );
 
-        // 2. We check if any row was actually updated
+        // 4. Check if the update actually happened
         if (result.rowCount === 0) {
-            return { success: false, message: "Seat is no longer available." };
+            return { success: false, message: "This seat was just taken by someone else." };
         }
 
-        // 3. Clear the cache for the event page so the user sees the updated seat map
+        // 5. Refresh the UI
         revalidatePath('/events/[id]', 'page');
 
-        return { success: true };
+        return { success: true, message: "Reservation confirmed!" };
     } catch (error) {
         console.error("Failed to reserve seat:", error);
-        return { success: false, message: "An unexpected error occurred." };
+        return { success: false, message: "Internal server error." };
     }
 }
